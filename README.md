@@ -47,7 +47,7 @@ extern "C" {
 ### 使用方法
 LogUtil是日志库文件  
 TestCase是测试用例，里面有库文件引用的详细的示例代码  
-只需要ILog.h这个头文件和编译好的DLL就可以使用了
+只需要ILog.h这个头文件和编译好的DLL就可以使用了  
 1. 使用导出函数GetClassObject获得日志对象实例
 2. 调用日志接口方法，info、error、debug、warning写入日志
 3. 调用ReleaseClassObject关闭日志文件，保存日志数据，这一步是必须的，否则有可能造成资源泄漏或者日志数据丢失
