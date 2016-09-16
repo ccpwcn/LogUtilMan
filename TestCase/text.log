@@ -1,0 +1,16 @@
+queue size:15
+2016-09-16 12:31:18[INFO] Thread 2 example random log message(0) for dll model testcase
+2016-09-16 12:31:18[INFO] Thread 2 example random log message(1) for dll model testcase
+2016-09-16 12:31:18[INFO] Thread 2 example random log message(2) for dll model testcase
+2016-09-16 12:31:18[INFO] Thread 2 example random log message(3) for dll model testcase
+2016-09-16 12:31:18[INFO] Thread 2 example random log message(4) for dll model testcase
+2016-09-16 12:31:18[INFO] Thread 0 example random log message(0) for dll model testcase
+2016-09-16 12:31:18[INFO] Thread 0 example random log message(1) for dll model testcase
+2016-09-16 12:31:18[INFO] Thread 0 example random log message(2) for dll model testcase
+2016-09-16 12:31:18[INFO] Thread 0 example random log message(3) for dll model testcase
+2016-09-16 12:31:18[INFO] Thread 0 example random log message(4) for dll model testcase
+2016-09-16 12:31:18[INFO] Thread 1 example random log message(0) for dll model testcase
+2016-09-16 12:31:18[INFO] Thread 1 example random log message(1) for dll model testcase
+2016-09-16 12:31:18[INFO] Thread 1 example random log message(2) for dll model testcase
+2016-09-16 12:31:18[INFO] Thread 1 example random log message(3) for dll model testcase
+2016-09-16 12:31:18[INFO] Thread 1 example random log message(4) for dll model testcase
