@@ -12,6 +12,12 @@
 |     500      |    50W     |      1.029s      |      5.086s        |
 |    1000      |   100W     |      2.012s      |     10.124s        |
  
+### 性能表现
+日志进入队列时的性能表现：
+[总完成时长](https://github.com/ccpwcn/LogUtilMan/blob/master/%E6%9C%80%E5%A4%A7%E5%85%A5%E9%98%9F%E6%97%B6%E9%95%BF.png)
+日志保存到磁盘中的性能表现：
+[最大入队时长](https://github.com/ccpwcn/LogUtilMan/blob/master/%E6%80%BB%E5%AE%8C%E6%88%90%E6%97%B6%E9%95%BF.png)
+
 ### 公开的接口
 ```
 class DLL_API ILog
