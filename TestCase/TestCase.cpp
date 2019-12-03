@@ -63,9 +63,14 @@ DWORD WINAPI MyThreadFunction(LPVOID lpParam)
 	}
 
 	DWORD dwStart = GetTickCount();
+	int r = 0;
 	for (long i = 0; i < nRunTimes; i++)
 	{
-		ptd->op->info(_T("Thread %d example random log message(%d) for dll model testcase"), ptd->dwThreadId, i);
+		r = ptd->op->info(_T("Thread %d example random log message(%d) for dll model testcase"), ptd->dwThreadId, i);
+		if (r == 0)
+		{
+			printf("Thread %d of message %d error\n", ptd->dwThreadId, i);
+		}
 	}
 	// printf("Test Thread %d DONE!!!\n", ptd->dwThreadId);
 	ptd->dwPushTime = GetTickCount() - dwStart;

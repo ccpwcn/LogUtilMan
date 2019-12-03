@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <queue> // std::queue
+#include <exception> // std::exception
 #include "Common.hpp"
 
 // 本文件内全局变量初始化
@@ -60,16 +61,25 @@ size_t CLog::info(__in_opt const TCHAR *fmt, ...)
 {
 	assert(fmt != NULL && fmt[0] != _T('\0'));
 	
-	va_list args;
-	va_start(args, fmt);
+	try {
+		va_list args;
+		va_start(args, fmt);
 
-	SYSTEMTIME st = { 0 };
-	GetLocalTime(&st);
-	size_t result = parse(&st, _T("INFO"), fmt, args);
+		SYSTEMTIME st = { 0 };
+		GetLocalTime(&st);
+		size_t result = parse(&st, _T("INFO"), fmt, args);
 
-	va_end(args);
-
-	return result;
+		va_end(args);
+		return result;
+	}
+	catch (std::exception & e)
+	{
+		char szBuf[64] = { 0 };
+		StringCchPrintfA(szBuf, 64, "write info log exception: %s\n", e.what());
+		printf(szBuf);
+		OutputDebugStringA(szBuf);
+		return 0;
+	}
 }
 
 size_t CLog::error(__in_opt const TCHAR *fmt, ...)
@@ -176,53 +186,23 @@ size_t CLog::parse(LPSYSTEMTIME lpSystemTime, __in LPCTSTR lpszLogTypeFlag, __in
 	size_t result = 0;
 
 	const int MIN_BUF_LEN = 64;
+	const int BUF_SIZE = 4096;
+	TCHAR szBuffer[BUF_SIZE] = { 0 };
 	TCHAR szTimeFlag[MIN_BUF_LEN] = { 0 };
 	StringCchPrintf(szTimeFlag, MIN_BUF_LEN, _T("%04d-%02d-%02d %02d:%02d:%02d[%s] "),
 		lpSystemTime->wYear, lpSystemTime->wMonth, lpSystemTime->wDay, lpSystemTime->wHour, lpSystemTime->wMinute, lpSystemTime->wSecond, lpszLogTypeFlag);
 
-	// 下面申请的内存，会在写入线程完成之后释放
-	// StringCch***函数族都是按指定大小操作目标缓冲区，并且会在操作完成之后在目标字符串尾部添加\0，所以申请的缓冲区不必使用memset清零
-	int len = _tcslen(fmt);
-	int nBufSize = len * 2 + MIN_BUF_LEN;
-	LPTSTR lpszBuffer = new TCHAR[nBufSize];
-	StringCchCopy(lpszBuffer, nBufSize, szTimeFlag);
-	HRESULT hr = StringCchVPrintf(lpszBuffer + _tcslen(lpszBuffer), nBufSize - _tcslen(lpszBuffer), fmt, args);
-	if (hr == STRSAFE_E_INSUFFICIENT_BUFFER)
-	{
-		delete[] lpszBuffer;
-		nBufSize = len * 4 + MIN_BUF_LEN;;
-		lpszBuffer = new TCHAR[nBufSize];
-		StringCchCopy(lpszBuffer, nBufSize, szTimeFlag);
-		hr = StringCchVPrintf(lpszBuffer + _tcslen(lpszBuffer), nBufSize - _tcslen(lpszBuffer), fmt, args);
-		if (hr == STRSAFE_E_INSUFFICIENT_BUFFER)
-		{
-			delete[] lpszBuffer;
-			nBufSize = len * 16 + MIN_BUF_LEN;
-			lpszBuffer = new TCHAR[nBufSize];
-			StringCchCopy(lpszBuffer, nBufSize, szTimeFlag);
-			hr = StringCchVPrintf(lpszBuffer + _tcslen(lpszBuffer), nBufSize - _tcslen(lpszBuffer), fmt, args);
-			if (hr == STRSAFE_E_INSUFFICIENT_BUFFER)
-			{
-				delete[] lpszBuffer;
-				nBufSize = len * 256 + MIN_BUF_LEN;
-				lpszBuffer = new TCHAR[nBufSize];
-				StringCchCopy(lpszBuffer, nBufSize, szTimeFlag);
-				hr = StringCchVPrintf(lpszBuffer + _tcslen(lpszBuffer), nBufSize - _tcslen(lpszBuffer), fmt, args);
-			}
-		}
-	}
+	StringCchCopy(szBuffer, BUF_SIZE, szTimeFlag);
+	HRESULT hr = StringCchVPrintf(szBuffer + _tcslen(szBuffer), BUF_SIZE - _tcslen(szBuffer) - 1, fmt, args);
 	if (SUCCEEDED(hr))
 	{
-		// 内存申请成功时，
+		// 内存申请成功时
+		result = _tcslen(szBuffer);
+		LPTSTR lpszBuffer = new TCHAR[result+1];
+		StringCchCopy(lpszBuffer, result, szBuffer);
 		g_Lock.Lock();
 		g_myLogQueue.push(lpszBuffer);
 		g_Lock.Unlock();
-		result = _tcslen(lpszBuffer);
-	}
-	else
-	{
-		// 这个lpszBuffer只在失败的时候下回收内存，成功的情况下，由写入线程将数据处理完毕之后进行回收
-		delete[] lpszBuffer;
 	}
 
 	return result;
