@@ -10,7 +10,7 @@
 # define DLL_API __declspec (dllexport)
 #endif
 
-/*
+/*********************************************************************************************
  * 日志类
  * 已经明确的使用规则：
  *    1、按照printf函数的语法提供输入
@@ -26,7 +26,9 @@
  * +--------------+------------+------------------+--------------------+
  * |    1000      |   100W     |      2.012s      |     10.124s        |
  * +--------------+------------+------------------+--------------------+
- */
+ * 注意：
+ *     GetClassObject和GetClassObjectPrintQueueSize只需要调用一个即可，先调用的生效，也没有必要重复调用。
+ *********************************************************************************************/
 class DLL_API ILog
 {
 public:
@@ -35,9 +37,13 @@ public:
 	virtual size_t error(__in_opt const TCHAR *fmt, ...) = 0;
 	virtual size_t debug(__in_opt const TCHAR *fmt, ...) = 0;
 	virtual size_t warning(__in_opt const TCHAR *fmt, ...) = 0;
+	// bPrintQueueSize为TRUE时（默认FALSE）会在日志中不定时打印日志队列的大小，在某些情况下有利于监控日志性能
+	virtual void print_queue_size(__in const BOOL bPrintQueueSize) = 0;
 };
 
 extern "C" {
+	// 获取日志对象
 	DLL_API ILog * GetClassObject(__in const LPCTSTR lpszLogFilename);
+	// 将日志队列中的所有数据写入日志文件，然后释放日志对象，回收资源
 	DLL_API void ReleaseClassObject(__in const ILog * instance);
 }

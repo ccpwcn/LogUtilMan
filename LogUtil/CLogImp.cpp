@@ -7,32 +7,39 @@
 #include "Common.hpp"
 
 // 本文件内全局变量初始化
-BOOL g_bWaitForQuit = FALSE;
 CLock g_Lock;
+BOOL g_quitNow = FALSE;
 std::queue<LPTSTR> g_myLogQueue;
 
-CLog::CLog(const LPCTSTR lpszLogFilename)
+
+CLog::CLog(const LPCTSTR lpszLogFilename, const BOOL bPrintQueueSize)
 {
+	g_quitNow = FALSE;
+
 	assert(lpszLogFilename != NULL && lpszLogFilename[0] != _T('\n'));
 	StringCchCopy(m_szFilename, MAX_PATH, lpszLogFilename);
-	
+
 	_tfopen_s(&m_fpLog, m_szFilename, _T("a"));
 	assert(m_fpLog != NULL);
 
+	m_bPrintQueueSize = bPrintQueueSize;
 	DWORD dwThread = 0;
 	m_hWriteThread = CreateThread(NULL, 0, m_fnWriteThread, this, CREATE_SUSPENDED, &dwThread);
 	assert(m_hWriteThread != NULL);
 	SetThreadPriority(m_hWriteThread, THREAD_PRIORITY_LOWEST);
 	ResumeThread(m_hWriteThread);
-	
-	// 自动复原，初始状态为无信号状态
-	//m_hWriteThreadEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
-	//assert(m_hWriteThreadEvent != NULL);
+
+	m_hWriteThreadEvent = NULL;
+
+	// 自动复原，初始状态为无信号状态，无信号就代表无日志
+	m_hWriteThreadEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
+	assert(m_hWriteThreadEvent != NULL);
 }
 
 CLog::~CLog()
 {
-	g_bWaitForQuit = TRUE;
+	g_quitNow = TRUE;
+	// SetEvent(m_hWriteThreadEvent);
 	WaitForSingleObject(m_hWriteThread, INFINITE);
 	CloseHandle(m_hWriteThread);
 	m_hWriteThread = NULL;
@@ -40,8 +47,11 @@ CLog::~CLog()
 	fclose(m_fpLog);
 	m_fpLog = NULL;
 
-	CloseHandle(m_hWriteThreadEvent);
-	m_hWriteThreadEvent = NULL;
+	if (m_hWriteThreadEvent != NULL)
+	{
+		CloseHandle(m_hWriteThreadEvent);
+		m_hWriteThreadEvent = NULL;
+	}
 	
 	g_Lock.~CLock();
 }
@@ -110,24 +120,35 @@ size_t CLog::warning(__in_opt const TCHAR *fmt, ...)
 	return result;
 }
 
+void CLog::print_queue_size(__in const BOOL bPrintQueueSize)
+{
+	m_bPrintQueueSize = bPrintQueueSize;
+}
+
 DWORD CLog::m_fnWriteThread(LPVOID lpParam)
 {
 	CLog * pLogInstance = (CLog *)lpParam;
 	assert(pLogInstance != NULL);
 
 	int nCoefficient = pLogInstance->m_fnGetSystemPreformanceCoefficient();
-
-	while (!g_bWaitForQuit || !g_myLogQueue.empty())
+	int nOriginCoefficient = nCoefficient;
+	while (TRUE)
 	{
-		// WaitForSingleObject(m_hWriteThreadEvent, INFINITE);
 		if (g_myLogQueue.empty())
 		{
+			if (g_quitNow)
+			{
+				break;
+			}
 			Sleep(nCoefficient);
 			continue;
 		}
 
 		size_t count = g_myLogQueue.size();
-		_ftprintf_s(pLogInstance->m_fpLog, _T("queue size:%u\n"), count);
+		if (pLogInstance->m_bPrintQueueSize)
+		{
+			_ftprintf_s(pLogInstance->m_fpLog, _T("queue size:%u\n"), count);
+		}
 
 		LPTSTR lpszMsg = NULL;
 		for (size_t i = 0; i < count; i++)
@@ -141,12 +162,14 @@ DWORD CLog::m_fnWriteThread(LPVOID lpParam)
 			_ftprintf_s(pLogInstance->m_fpLog, lpszMsg);
 			if (lpszMsg[len - 1] != _T('\n'))
 				_ftprintf_s(pLogInstance->m_fpLog, _T("\n"));
+			// 及时回收内存
 			delete[] lpszMsg;
 		}
 	}
 
-	return 0;
+	return NO_ERROR;
 }
+
 
 size_t CLog::parse(LPSYSTEMTIME lpSystemTime, __in LPCTSTR lpszLogTypeFlag, __in_opt const TCHAR *fmt, va_list args)
 {
@@ -190,6 +213,7 @@ size_t CLog::parse(LPSYSTEMTIME lpSystemTime, __in LPCTSTR lpszLogTypeFlag, __in
 	}
 	if (SUCCEEDED(hr))
 	{
+		// 内存申请成功时，
 		g_Lock.Lock();
 		g_myLogQueue.push(lpszBuffer);
 		g_Lock.Unlock();
@@ -197,10 +221,9 @@ size_t CLog::parse(LPSYSTEMTIME lpSystemTime, __in LPCTSTR lpszLogTypeFlag, __in
 	}
 	else
 	{
+		// 这个lpszBuffer只在失败的时候下回收内存，成功的情况下，由写入线程将数据处理完毕之后进行回收
 		delete[] lpszBuffer;
 	}
-
-	//SetEvent(m_hWriteThreadEvent);
 
 	return result;
 }

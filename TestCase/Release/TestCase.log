@@ -1,8 +1,7 @@
-﻿  TestCase.cpp
-  正在生成代码
-  已完成代码的生成
-  1 of 12 functions ( 8.3%) were compiled, the rest were copied from previous compilation.
-    0 functions were new in current compilation
-    2 functions had inline decision re-evaluated but remain unchanged
-  TestCase.vcxproj -> D:\Documents\Visual Studio 2015\Projects\LogUtilMan\Release\TestCase.exe
-  TestCase.vcxproj -> D:\Documents\Visual Studio 2015\Projects\LogUtilMan\Release\TestCase.pdb (Full PDB)
+﻿  stdafx.cpp
+  TestCase.cpp
+  Generating code
+  All 12 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  Finished generating code
+  TestCase.vcxproj -> D:\Documents\Visual Studio 2019\Projects\LogUtilMan\Release\TestCase.exe
+  TestCase.vcxproj -> D:\Documents\Visual Studio 2019\Projects\LogUtilMan\Release\TestCase.pdb (Full PDB)

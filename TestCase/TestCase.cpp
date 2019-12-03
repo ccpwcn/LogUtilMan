@@ -13,23 +13,28 @@
 
 int nThreadCount = 100;
 int nRunTimes = 200;
+BOOL bPrintQueueSize = TRUE;
 
 DWORD test();
 
 int _tmain(int argc, TCHAR *argv[])
 {
-	if (argc != 3)
+	if (argc != 4)
 	{
-		_tprintf(_T("TestCase.exe nThreadCount nWriteCount\n"));
+		_tprintf(_T("TestCase.exe nThreadCount nWriteCount bPrintQueueSize\n"));
 		return 0;
 	}
 	nThreadCount = _tstoi(argv[1]);
 	nRunTimes = _tstoi(argv[2]);
+	bPrintQueueSize = _tcsicmp(argv[3], _T("0")) != 0;
 
-	test();
+	// 开始执行测试
+	_tprintf(_T("The tester is running, please wait...\n"));
+	DWORD dwRet = test();
+	_tprintf(_T("The tester done, return %d\n"), dwRet);
 
 #ifdef _DEBUG
-	_tprintf(_T("Now, you can heck the memory leak information, then press ENTER key for exit..."));
+	_tprintf(_T("Now, you can check the memory leak information, then press ENTER key for exit...\n"));
 	getchar();
 #endif
     return 0;
@@ -47,12 +52,14 @@ DWORD WINAPI MyThreadFunction(LPVOID lpParam);
 
 int seh_filer(int code);
 
+
 DWORD WINAPI MyThreadFunction(LPVOID lpParam)
 {
 	THREAD_DATA * ptd = (THREAD_DATA *)lpParam;
 	if (ptd == NULL)
 	{
 		_tprintf(_T("Thread failed.\n"));
+		return ERROR_INVALID_PARAMETER;
 	}
 
 	DWORD dwStart = GetTickCount();
@@ -60,14 +67,15 @@ DWORD WINAPI MyThreadFunction(LPVOID lpParam)
 	{
 		ptd->op->info(_T("Thread %d example random log message(%d) for dll model testcase"), ptd->dwThreadId, i);
 	}
+	// printf("Test Thread %d DONE!!!\n", ptd->dwThreadId);
 	ptd->dwPushTime = GetTickCount() - dwStart;
 
-	return 0;
+	return NO_ERROR;
 }
 
 DWORD test()
 {
-	DWORD dwRet = 0;
+	DWORD dwRet = NO_ERROR;
 
 	THREAD_DATA * ptd = NULL;
 	DWORD   * pdwThreadIdArray = NULL;
@@ -85,11 +93,11 @@ DWORD test()
 				_tprintf(_T("Load dll failed, error code:%u\n"), dwRet = GetLastError());
 				return dwRet;
 			}
-
-			typedef ILog *(FN_GetClassObject)(__in const LPCTSTR lpszLogFilename);
-			typedef void (FN_ReleaseClassObject)(__in const ILog * instance);
+			typedef ILog* (FN_GetClassObject)(__in const LPCTSTR lpszLogFilename);
+			typedef void (FN_ReleaseClassObject)(__in const ILog* instance);
 			FN_GetClassObject * fpGetClassObject = (FN_GetClassObject *)GetProcAddress(hDllLib, "GetClassObject");
 			FN_ReleaseClassObject * fpReleaseClassObject = (FN_ReleaseClassObject *)GetProcAddress(hDllLib, "ReleaseClassObject");
+
 			if (fpGetClassObject == NULL || fpReleaseClassObject == NULL)
 			{
 				_tprintf(_T("Get function from dll failed, error code:%u\n"), dwRet = GetLastError());
@@ -121,6 +129,7 @@ DWORD test()
 					continue;
 				}
 			}
+			// ptd[0].op->print_queue_size(TRUE);
 			for (long i = 0; i < nThreadCount; i++)
 			{
 				if (phThreadArray[i] != NULL)
@@ -131,7 +140,15 @@ DWORD test()
 
 			// 等待压力线程全部返回
 			WaitForMultipleObjects(nThreadCount, phThreadArray, TRUE, INFINITE);
-
+			
+			// 关闭句柄
+			for (long i = 0; i < nThreadCount; i++)
+			{
+				if (phThreadArray[i] != NULL)
+				{
+					CloseHandle(phThreadArray[i]);
+				}
+			}
 			// 等待日志处理任务全部完成
 			DWORD time = 0;
 			for (long i = 0; i < nThreadCount; i++)
@@ -172,10 +189,13 @@ DWORD test()
 			delete[] pdwThreadIdArray;
 		if (phThreadArray != NULL)
 			delete[] phThreadArray;
+
+		_tprintf(_T("DONE\n"));
 	}
 
 	return dwRet;
 }
+
 
 int seh_filer(int code)
 {

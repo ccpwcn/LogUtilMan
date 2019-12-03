@@ -1,10 +1,10 @@
-﻿  CLogImp.cpp
+﻿  stdafx.cpp
   ILog.cpp
-    正在创建库 D:\Documents\Visual Studio 2015\Projects\LogUtilMan\Release\LogUtil.lib 和对象 D:\Documents\Visual Studio 2015\Projects\LogUtilMan\Release\LogUtil.exp
-  正在生成代码
-  7 of 160 functions ( 4.4%) were compiled, the rest were copied from previous compilation.
-    5 functions were new in current compilation
-    3 functions had inline decision re-evaluated but remain unchanged
-  已完成代码的生成
-  LogUtil.vcxproj -> D:\Documents\Visual Studio 2015\Projects\LogUtilMan\Release\LogUtil.dll
-  LogUtil.vcxproj -> D:\Documents\Visual Studio 2015\Projects\LogUtilMan\Release\LogUtil.pdb (Full PDB)
+  CLogImp.cpp
+  dllmain.cpp
+     Creating library D:\Documents\Visual Studio 2019\Projects\LogUtilMan\Release\LogUtil.lib and object D:\Documents\Visual Studio 2019\Projects\LogUtilMan\Release\LogUtil.exp
+  Generating code
+  All 162 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  Finished generating code
+  LogUtil.vcxproj -> D:\Documents\Visual Studio 2019\Projects\LogUtilMan\Release\LogUtil.dll
+  LogUtil.vcxproj -> D:\Documents\Visual Studio 2019\Projects\LogUtilMan\Release\LogUtil.pdb (Full PDB)
