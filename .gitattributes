@@ -1,2 +1,4 @@
-*.html linguist-language=c++
-*.js linguist-language=c++
+*.html linguist-language=C++
+*.js linguist-language=C++
+*.h linguist-language=C++
+*.cpp linguist-language=C++
