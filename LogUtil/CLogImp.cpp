@@ -185,11 +185,11 @@ size_t CLog::parse(LPSYSTEMTIME lpSystemTime, __in LPCTSTR lpszLogTypeFlag, __in
 {
 	size_t result = 0;
 
-	const int MIN_BUF_LEN = 64;
+	const int TIME_BUF_LEN = 64;
 	const int BUF_SIZE = 4096;
 	TCHAR szBuffer[BUF_SIZE] = { 0 };
-	TCHAR szTimeFlag[MIN_BUF_LEN] = { 0 };
-	StringCchPrintf(szTimeFlag, MIN_BUF_LEN, _T("%04d-%02d-%02d %02d:%02d:%02d[%s] "),
+	TCHAR szTimeFlag[TIME_BUF_LEN] = { 0 };
+	StringCchPrintf(szTimeFlag, TIME_BUF_LEN, _T("%04d-%02d-%02d %02d:%02d:%02d[%s] "),
 		lpSystemTime->wYear, lpSystemTime->wMonth, lpSystemTime->wDay, lpSystemTime->wHour, lpSystemTime->wMinute, lpSystemTime->wSecond, lpszLogTypeFlag);
 
 	StringCchCopy(szBuffer, BUF_SIZE, szTimeFlag);

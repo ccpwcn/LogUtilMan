@@ -67,7 +67,7 @@ DWORD WINAPI MyThreadFunction(LPVOID lpParam)
 	for (long i = 0; i < nRunTimes; i++)
 	{
 		r = ptd->op->info(_T("Thread %d example random log message(%d) for dll model testcase"), ptd->dwThreadId, i);
-		if (r == 0)
+		if (!r)
 		{
 			printf("Thread %d of message %d error\n", ptd->dwThreadId, i);
 		}
