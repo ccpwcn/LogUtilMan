@@ -54,7 +54,7 @@ CLog::~CLog()
 		m_hWriteThreadEvent = NULL;
 	}
 	
-	g_Lock.~CLock();
+	// g_Lock.~CLock();
 }
 
 size_t CLog::info(__in_opt const TCHAR *fmt, ...)
