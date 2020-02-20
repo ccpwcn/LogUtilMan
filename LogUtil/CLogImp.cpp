@@ -27,6 +27,7 @@ CLog::CLog(const LPCTSTR lpszLogFilename, const BOOL bPrintQueueSize)
 	DWORD dwThread = 0;
 	m_hWriteThread = CreateThread(NULL, 0, m_fnWriteThread, this, CREATE_SUSPENDED, &dwThread);
 	assert(m_hWriteThread != NULL);
+	// 降低日志写入线程的优先级
 	SetThreadPriority(m_hWriteThread, THREAD_PRIORITY_LOWEST);
 	ResumeThread(m_hWriteThread);
 
