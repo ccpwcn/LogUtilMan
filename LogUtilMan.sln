@@ -1,9 +1,12 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31729.503
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TestCase", "TestCase\TestCase.vcxproj", "{66FAE115-78ED-4CA7-A4C4-9F940D8DC870}"
+	ProjectSection(ProjectDependencies) = postProject
+		{48B67E07-BBEE-4B62-A03F-778AF2CD4A50} = {48B67E07-BBEE-4B62-A03F-778AF2CD4A50}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LogUtil", "LogUtil\LogUtil.vcxproj", "{48B67E07-BBEE-4B62-A03F-778AF2CD4A50}"
 EndProject
@@ -34,5 +37,8 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {CE8F3ACA-EE77-4E89-8ED3-DD19D0973323}
 	EndGlobalSection
 EndGlobal

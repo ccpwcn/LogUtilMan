@@ -1,11 +1,10 @@
 #include "stdafx.h"
 #include "CLogImp.h"
-#include "CLogImp.h"
 #include <stdlib.h>
 #include <assert.h>
 #include <queue> // std::queue
 #include <exception> // std::exception
-#include "Common.hpp"
+#include "Common.h"
 
 // 本文件内全局变量初始化
 CLock g_Lock;
@@ -15,6 +14,13 @@ std::queue<LPTSTR> g_myLogQueue;
 
 CLog::CLog(const LPCTSTR lpszLogFilename, const BOOL bPrintQueueSize)
 {
+	// 初始化
+	ZeroMemory(m_szFilename, MAX_PATH);
+	m_fpLog = NULL;
+	m_bPrintQueueSize = FALSE;
+	m_hWriteThread = NULL;
+	m_hWriteThreadEvent = NULL;
+
 	g_quitNow = FALSE;
 
 	assert(lpszLogFilename != NULL && lpszLogFilename[0] != _T('\n'));
@@ -42,12 +48,16 @@ CLog::~CLog()
 {
 	g_quitNow = TRUE;
 	// SetEvent(m_hWriteThreadEvent);
-	WaitForSingleObject(m_hWriteThread, INFINITE);
-	CloseHandle(m_hWriteThread);
-	m_hWriteThread = NULL;
+	if (m_hWriteThread != NULL) {
+		WaitForSingleObject(m_hWriteThread, INFINITE);
+		CloseHandle(m_hWriteThread);
+		m_hWriteThread = NULL;
+	}
 
-	fclose(m_fpLog);
-	m_fpLog = NULL;
+	if (m_fpLog != NULL) {
+		fclose(m_fpLog);
+		m_fpLog = NULL;
+	}
 
 	if (m_hWriteThreadEvent != NULL)
 	{

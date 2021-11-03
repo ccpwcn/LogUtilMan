@@ -4,32 +4,33 @@
 #include "stdafx.h"
 #include "ILog.h"
 #include "CLogImp.h"
+#include "Common.h"
 
 // 使用单例模式
 CLog * g_instance = NULL;
 // 锁
-CLock g_Lock;
+CLock g_LogLock;
 
 ILog * GetClassObject(__in const LPCTSTR lpszLogFilename)
 {
-	g_Lock.~CLock();
+	g_LogLock.~CLock();
 	if (g_instance == NULL)
 	{
 		g_instance = new CLog(lpszLogFilename);
 	}
-	g_Lock.Unlock();
+	g_LogLock.Unlock();
 	return g_instance;
 }
 
 void ReleaseClassObject(__in const ILog * instance)
 {
-	g_Lock.~CLock();
+	g_LogLock.~CLock();
 	if (g_instance != NULL)
 	{
 		delete g_instance;
 		g_instance = NULL;
 	}
-	g_Lock.Unlock();
+	g_LogLock.Unlock();
 }
 
 ILog::~ILog()
