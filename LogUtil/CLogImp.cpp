@@ -14,7 +14,7 @@ std::queue<LPTSTR> g_myLogQueue;
 
 CLog::CLog(const LPCTSTR lpszLogFilename, const BOOL bPrintQueueSize)
 {
-	// 初始化
+	// 初始化的时候，先预置值，防止意外重复初始化
 	ZeroMemory(m_szFilename, MAX_PATH);
 	m_fpLog = NULL;
 	m_bPrintQueueSize = FALSE;
@@ -48,6 +48,7 @@ CLog::~CLog()
 {
 	g_quitNow = TRUE;
 	// SetEvent(m_hWriteThreadEvent);
+	// 清理回收资源
 	if (m_hWriteThread != NULL) {
 		WaitForSingleObject(m_hWriteThread, INFINITE);
 		CloseHandle(m_hWriteThread);
