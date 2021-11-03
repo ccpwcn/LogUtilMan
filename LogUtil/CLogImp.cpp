@@ -224,9 +224,9 @@ int CLog::m_fnGetSystemPreformanceCoefficient()
 {
 	int nCoefficient = 2;
 
-	// 默认电脑有2个CPU、4GB内存
-	int nProcessorCount = 2;
-	__int64 nMemorySize = 4 * 1024 * 1024 * 1024LL;
+	// 默认电脑有4个CPU、8GB内存
+	int nProcessorCount = 4;
+	__int64 nMemorySize = 8 * 1024 * 1024 * 1024LL;
 
 	typedef struct _SYSTEM_BASIC_INFORMATION
 	{
