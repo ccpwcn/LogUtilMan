@@ -71,7 +71,9 @@ CLog::~CLog()
 
 size_t CLog::info(__in_opt const TCHAR *fmt, ...)
 {
-	assert(fmt != NULL && fmt[0] != _T('\0'));
+	if (fmt == NULL || fmt[0] == _T('\0')) {
+		return -1;
+	}
 	
 	try {
 		va_list args;
@@ -96,7 +98,9 @@ size_t CLog::info(__in_opt const TCHAR *fmt, ...)
 
 size_t CLog::error(__in_opt const TCHAR *fmt, ...)
 {
-	assert(fmt != NULL && fmt[0] != _T('\0'));
+	if (fmt == NULL || fmt[0] == _T('\0')) {
+		return -1;
+	}
 	
 	va_list args;
 	va_start(args, fmt);
@@ -112,7 +116,9 @@ size_t CLog::error(__in_opt const TCHAR *fmt, ...)
 
 size_t CLog::debug(__in_opt const TCHAR *fmt, ...)
 {
-	assert(fmt != NULL && fmt[0] != _T('\0'));
+	if (fmt == NULL || fmt[0] == _T('\0')) {
+		return -1;
+	}
 	
 	va_list args;
 	va_start(args, fmt);
@@ -128,7 +134,9 @@ size_t CLog::debug(__in_opt const TCHAR *fmt, ...)
 
 size_t CLog::warning(__in_opt const TCHAR *fmt, ...)
 {
-	assert(fmt != NULL && fmt[0] != _T('\0'));
+	if (fmt == NULL || fmt[0] == _T('\0')) {
+		return -1;
+	}
 	
 	va_list args;
 	va_start(args, fmt);
@@ -195,6 +203,9 @@ DWORD CLog::m_fnWriteThread(LPVOID lpParam)
 
 size_t CLog::parse(LPSYSTEMTIME lpSystemTime, __in LPCTSTR lpszLogTypeFlag, __in_opt const TCHAR *fmt, va_list args)
 {
+	if (fmt == NULL || fmt[0] == _T('\0')) {
+		return -1;
+	}
 	size_t result = 0;
 
 	const int TIME_BUF_LEN = 64;
