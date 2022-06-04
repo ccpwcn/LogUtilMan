@@ -92,7 +92,7 @@ size_t CLog::info(__in_opt const TCHAR *fmt, ...)
 		StringCchPrintfA(szBuf, 64, "write info log exception: %s\n", e.what());
 		printf(szBuf);
 		OutputDebugStringA(szBuf);
-		return 0;
+		return -1;
 	}
 }
 
@@ -102,16 +102,26 @@ size_t CLog::error(__in_opt const TCHAR *fmt, ...)
 		return -1;
 	}
 	
-	va_list args;
-	va_start(args, fmt);
+	try {
+		va_list args;
+		va_start(args, fmt);
 
-	SYSTEMTIME st = { 0 };
-	GetLocalTime(&st);
-	size_t result = parse(&st, _T("ERROR"), fmt, args);
+		SYSTEMTIME st = { 0 };
+		GetLocalTime(&st);
+		size_t result = parse(&st, _T("ERROR"), fmt, args);
 
-	va_end(args);
+		va_end(args);
 
-	return result;
+		return result;
+	}
+	catch (std::exception & e)
+	{
+		char szBuf[64] = { 0 };
+		StringCchPrintfA(szBuf, 64, "write error log exception: %s\n", e.what());
+		printf(szBuf);
+		OutputDebugStringA(szBuf);
+		return -1;
+	}
 }
 
 size_t CLog::debug(__in_opt const TCHAR *fmt, ...)
@@ -120,16 +130,26 @@ size_t CLog::debug(__in_opt const TCHAR *fmt, ...)
 		return -1;
 	}
 	
-	va_list args;
-	va_start(args, fmt);
+	try {
+		va_list args;
+		va_start(args, fmt);
 
-	SYSTEMTIME st = { 0 };
-	GetLocalTime(&st);
-	size_t result = parse(&st, _T("DEBUG"), fmt, args);
+		SYSTEMTIME st = { 0 };
+		GetLocalTime(&st);
+		size_t result = parse(&st, _T("DEBUG"), fmt, args);
 
-	va_end(args);
+		va_end(args);
 
-	return result;
+		return result;
+	}
+	catch (std::exception & e)
+	{
+		char szBuf[64] = { 0 };
+		StringCchPrintfA(szBuf, 64, "write debug log exception: %s\n", e.what());
+		printf(szBuf);
+		OutputDebugStringA(szBuf);
+		return -1;
+	}
 }
 
 size_t CLog::warning(__in_opt const TCHAR *fmt, ...)
@@ -138,16 +158,26 @@ size_t CLog::warning(__in_opt const TCHAR *fmt, ...)
 		return -1;
 	}
 	
-	va_list args;
-	va_start(args, fmt);
+	try {
+		va_list args;
+		va_start(args, fmt);
 
-	SYSTEMTIME st = { 0 };
-	GetLocalTime(&st);
-	size_t result = parse(&st, _T("WARNING"), fmt, args);
+		SYSTEMTIME st = { 0 };
+		GetLocalTime(&st);
+		size_t result = parse(&st, _T("WARNING"), fmt, args);
 
-	va_end(args);
+		va_end(args);
 
-	return result;
+		return result;
+	}
+	catch (std::exception& e)
+	{
+		char szBuf[64] = { 0 };
+		StringCchPrintfA(szBuf, 64, "write warning log exception: %s\n", e.what());
+		printf(szBuf);
+		OutputDebugStringA(szBuf);
+		return -1;
+	}
 }
 
 void CLog::print_queue_size(__in const BOOL bPrintQueueSize)
