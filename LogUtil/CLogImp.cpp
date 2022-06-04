@@ -23,16 +23,16 @@ CLog::CLog(const LPCTSTR lpszLogFilename, const BOOL bPrintQueueSize)
 
 	g_quitNow = FALSE;
 
-	assert(lpszLogFilename != NULL && lpszLogFilename[0] != _T('\n'));
+	assert(_T("日志文件名无效"), lpszLogFilename != NULL && lpszLogFilename[0] != _T('\n'));
 	StringCchCopy(m_szFilename, MAX_PATH, lpszLogFilename);
 
 	_tfopen_s(&m_fpLog, m_szFilename, _T("a"));
-	assert(m_fpLog != NULL);
+	assert(_T("无法打开日志文件"), m_fpLog != NULL);
 
 	m_bPrintQueueSize = bPrintQueueSize;
 	DWORD dwThread = 0;
 	m_hWriteThread = CreateThread(NULL, 0, m_fnWriteThread, this, CREATE_SUSPENDED, &dwThread);
-	assert(m_hWriteThread != NULL);
+	assert(_T("创建日志线程失败"), m_hWriteThread != NULL);
 	// 降低日志写入线程的优先级
 	SetThreadPriority(m_hWriteThread, THREAD_PRIORITY_LOWEST);
 	ResumeThread(m_hWriteThread);
@@ -41,7 +41,7 @@ CLog::CLog(const LPCTSTR lpszLogFilename, const BOOL bPrintQueueSize)
 
 	// 自动复原，初始状态为无信号状态，无信号就代表无日志
 	m_hWriteThreadEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
-	assert(m_hWriteThreadEvent != NULL);
+	assert(_T("线程通信机制异常"), m_hWriteThreadEvent != NULL);
 }
 
 CLog::~CLog()
@@ -188,12 +188,14 @@ DWORD CLog::m_fnWriteThread(LPVOID lpParam)
 			g_myLogQueue.pop();
 			g_Lock.Unlock();
 
-			int len = _tcslen(lpszMsg);
-			_ftprintf_s(pLogInstance->m_fpLog, lpszMsg);
-			if (lpszMsg[len - 1] != _T('\n'))
-				_ftprintf_s(pLogInstance->m_fpLog, _T("\n"));
-			// 及时回收内存
-			delete[] lpszMsg;
+			if (lpszMsg != NULL) {
+				int len = _tcslen(lpszMsg);
+				_ftprintf_s(pLogInstance->m_fpLog, lpszMsg);
+				if (lpszMsg[len - 1] != _T('\n'))
+					_ftprintf_s(pLogInstance->m_fpLog, _T("\n"));
+				// 及时回收内存
+				delete[] lpszMsg;
+			}
 		}
 	}
 
