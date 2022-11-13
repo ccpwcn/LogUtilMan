@@ -204,7 +204,7 @@ DWORD CLog::m_fnWriteThread(LPVOID lpParam)
 			continue;
 		}
 
-		size_t count = g_myLogQueue.size();
+		int count = g_myLogQueue.size();
 		if (pLogInstance->m_bPrintQueueSize)
 		{
 			_ftprintf_s(pLogInstance->m_fpLog, _T("queue size:%u\n"), count);
@@ -254,7 +254,8 @@ size_t CLog::parse(LPSYSTEMTIME lpSystemTime, __in LPCTSTR lpszLogTypeFlag, __in
 		// 内存申请成功时
 		result = _tcslen(szBuffer);
 		LPTSTR lpszBuffer = new TCHAR[result+1];
-		StringCchCopy(lpszBuffer, result, szBuffer);
+		memset(lpszBuffer, 0, result + 1);
+		StringCchCopy(lpszBuffer, result + 1, szBuffer);
 		g_Lock.Lock();
 		g_myLogQueue.push(lpszBuffer);
 		g_Lock.Unlock();
@@ -267,7 +268,7 @@ int CLog::m_fnGetSystemPreformanceCoefficient()
 {
 	int nCoefficient = 2;
 
-	// 默认电脑有4个CPU、8GB内存
+	// 默认电脑有4核CPU、8GB内存
 	int nProcessorCount = 4;
 	__int64 nMemorySize = 8 * 1024 * 1024 * 1024LL;
 
@@ -287,7 +288,7 @@ int CLog::m_fnGetSystemPreformanceCoefficient()
 	}SYSTEM_BASIC_INFORMATION, *PSYSTEM_BASIC_INFORMATION;
 	SYSTEM_BASIC_INFORMATION SysBaseInfo = { 0 };
 	typedef LONG(WINAPI *FN_NtQuerySystemInformation)(UINT, PVOID, ULONG, PULONG);
-	FN_NtQuerySystemInformation pfnNtQuerySystemInformation = (FN_NtQuerySystemInformation)GetProcAddress(GetModuleHandle(_T("ntdll")), "NtQuerySystemInformation");
+	FN_NtQuerySystemInformation pfnNtQuerySystemInformation = (FN_NtQuerySystemInformation)GetProcAddress(GetModuleHandle(_T("ntdll.dll")), "NtQuerySystemInformation");
 	if (pfnNtQuerySystemInformation != NULL)
 	{
 #define SystemBasicInformation 0
