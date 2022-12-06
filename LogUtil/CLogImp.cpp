@@ -118,7 +118,6 @@ size_t CLog::error(__in_opt const TCHAR *fmt, ...)
 	{
 		char szBuf[64] = { 0 };
 		StringCchPrintfA(szBuf, 64, "write error log exception: %s\n", e.what());
-		printf(szBuf);
 		OutputDebugStringA(szBuf);
 		return -1;
 	}
@@ -174,7 +173,6 @@ size_t CLog::warning(__in_opt const TCHAR *fmt, ...)
 	{
 		char szBuf[64] = { 0 };
 		StringCchPrintfA(szBuf, 64, "write warning log exception: %s\n", e.what());
-		printf(szBuf);
 		OutputDebugStringA(szBuf);
 		return -1;
 	}
@@ -287,20 +285,28 @@ int CLog::m_fnGetSystemPreformanceCoefficient()
 		UCHAR NumberProcessors; //有多少个处理器
 	}SYSTEM_BASIC_INFORMATION, *PSYSTEM_BASIC_INFORMATION;
 	SYSTEM_BASIC_INFORMATION SysBaseInfo = { 0 };
-	typedef LONG(WINAPI *FN_NtQuerySystemInformation)(UINT, PVOID, ULONG, PULONG);
-	FN_NtQuerySystemInformation pfnNtQuerySystemInformation = (FN_NtQuerySystemInformation)GetProcAddress(GetModuleHandle(_T("ntdll.dll")), "NtQuerySystemInformation");
-	if (pfnNtQuerySystemInformation != NULL)
+	HMODULE ntdllMod = GetModuleHandle(_T("ntdll.dll"));
+	if (ntdllMod != NULL)
 	{
-#define SystemBasicInformation 0
-		LONG status = pfnNtQuerySystemInformation(SystemBasicInformation, &SysBaseInfo, sizeof(SysBaseInfo), NULL);
-		if (status == NO_ERROR)
+		typedef LONG(WINAPI* FN_NtQuerySystemInformation)(UINT, PVOID, ULONG, PULONG);
+		FN_NtQuerySystemInformation pfnNtQuerySystemInformation = (FN_NtQuerySystemInformation)GetProcAddress(ntdllMod, "NtQuerySystemInformation");
+		TCHAR szDebugBuff[MAX_PATH] = { 0 };
+		StringCchPrintf(szDebugBuff, MAX_PATH - 1, _T("FN_NtQuerySystemInformation address %p"), pfnNtQuerySystemInformation);
+		OutputDebugString(szDebugBuff);
+		if (pfnNtQuerySystemInformation != NULL)
 		{
-			nProcessorCount = SysBaseInfo.NumberProcessors;
-			nMemorySize = SysBaseInfo.PhysicalPageSize * SysBaseInfo.NumberOfPhysicalPages;
+#define SystemBasicInformation 0
+			LONG status = pfnNtQuerySystemInformation(SystemBasicInformation, &SysBaseInfo, sizeof(SysBaseInfo), NULL);
+			if (status == NO_ERROR)
+			{
+				nProcessorCount = SysBaseInfo.NumberProcessors;
+				nMemorySize = SysBaseInfo.PhysicalPageSize * SysBaseInfo.NumberOfPhysicalPages;
+			}
 		}
+
+		nCoefficient = (nProcessorCount + 1) * int((double)nMemorySize / 1024 / 1024 / 1024 * 0.6) * 20;
+		StringCchPrintf(szDebugBuff, MAX_PATH - 1, _T("FN_NtQuerySystemInformation nCoefficient %d"), nCoefficient);
+		OutputDebugString(szDebugBuff);
 	}
-
-	nCoefficient = (nProcessorCount + 1) * int((double)nMemorySize / 1024 / 1024 / 1024 * 0.6) * 20;
-
 	return nCoefficient;
 }
