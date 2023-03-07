@@ -19,7 +19,7 @@ public:
 	size_t warning(__in_opt const TCHAR *fmt, ...);
 	void print_queue_size(__in const BOOL bPrintQueueSize);
 private:
-	TCHAR m_szFilename[MAX_PATH];
+	TCHAR m_szFilename[BUFSIZ];
 	FILE * m_fpLog;
 	BOOL m_bPrintQueueSize;
 	HANDLE m_hWriteThread;

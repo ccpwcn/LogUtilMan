@@ -6,7 +6,7 @@
 #include <exception> // std::exception
 #include "Common.h"
 
-// 本文件内全局变量初始化
+// 本文件内全局变量初始化，之所以要添加为全局锁而不是放在类中，是为了防止调用DLL的客户端初始化多个日志实例而导致错误
 CLock g_Lock;
 BOOL g_quitNow = FALSE;
 std::queue<LPTSTR> g_myLogQueue;
@@ -15,7 +15,7 @@ std::queue<LPTSTR> g_myLogQueue;
 CLog::CLog(const LPCTSTR lpszLogFilename, const BOOL bPrintQueueSize)
 {
 	// 初始化的时候，先预置值，防止意外重复初始化
-	ZeroMemory(m_szFilename, MAX_PATH);
+	ZeroMemory(m_szFilename, BUFSIZ);
 	m_fpLog = NULL;
 	m_bPrintQueueSize = FALSE;
 	m_hWriteThread = NULL;
@@ -23,25 +23,23 @@ CLog::CLog(const LPCTSTR lpszLogFilename, const BOOL bPrintQueueSize)
 
 	g_quitNow = FALSE;
 
-	assert(_T("日志文件名无效"), lpszLogFilename != NULL && lpszLogFilename[0] != _T('\n'));
-	StringCchCopy(m_szFilename, MAX_PATH, lpszLogFilename);
+	assert(lpszLogFilename != NULL && lpszLogFilename[0] != _T('\n') && _T("日志文件名无效"));
+	StringCchCopy(m_szFilename, BUFSIZ, lpszLogFilename);
 
 	_tfopen_s(&m_fpLog, m_szFilename, _T("a"));
-	assert(_T("无法打开日志文件"), m_fpLog != NULL);
+	assert(m_fpLog != NULL && _T("无法打开日志文件"));
 
 	m_bPrintQueueSize = bPrintQueueSize;
 	DWORD dwThread = 0;
 	m_hWriteThread = CreateThread(NULL, 0, m_fnWriteThread, this, CREATE_SUSPENDED, &dwThread);
-	assert(_T("创建日志线程失败"), m_hWriteThread != NULL);
+	assert(m_hWriteThread != NULL && _T("创建日志线程失败"));
 	// 降低日志写入线程的优先级
 	SetThreadPriority(m_hWriteThread, THREAD_PRIORITY_LOWEST);
 	ResumeThread(m_hWriteThread);
 
-	m_hWriteThreadEvent = NULL;
-
 	// 自动复原，初始状态为无信号状态，无信号就代表无日志
 	m_hWriteThreadEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
-	assert(_T("线程通信机制异常"), m_hWriteThreadEvent != NULL);
+	assert(m_hWriteThreadEvent != NULL && _T("线程通信机制异常"));
 }
 
 CLog::~CLog()
@@ -202,10 +200,10 @@ DWORD CLog::m_fnWriteThread(LPVOID lpParam)
 			continue;
 		}
 
-		int count = g_myLogQueue.size();
+		size_t count = g_myLogQueue.size();
 		if (pLogInstance->m_bPrintQueueSize)
 		{
-			_ftprintf_s(pLogInstance->m_fpLog, _T("queue size:%u\n"), count);
+			_ftprintf_s(pLogInstance->m_fpLog, _T("queue size:%zu\n"), count);
 		}
 
 		LPTSTR lpszMsg = NULL;
@@ -217,7 +215,7 @@ DWORD CLog::m_fnWriteThread(LPVOID lpParam)
 			g_Lock.Unlock();
 
 			if (lpszMsg != NULL) {
-				int len = _tcslen(lpszMsg);
+				size_t len = _tcslen(lpszMsg);
 				_ftprintf_s(pLogInstance->m_fpLog, lpszMsg);
 				if (lpszMsg[len - 1] != _T('\n'))
 					_ftprintf_s(pLogInstance->m_fpLog, _T("\n"));

@@ -11,8 +11,8 @@
 #define REFERENCE_DLL
 #include "..\LogUtil\ILog.h"
 
-int nThreadCount = 100;
-int nRunTimes = 200;
+unsigned int nThreadCount = 100;
+unsigned int nRunTimes = 200;
 BOOL bPrintQueueSize = TRUE;
 
 DWORD test();
@@ -63,13 +63,13 @@ DWORD WINAPI MyThreadFunction(LPVOID lpParam)
 	}
 
 	DWORD dwStart = GetTickCount();
-	int r = 0;
-	for (long i = 0; i < nRunTimes; i++)
+	size_t r = 0;
+	for (size_t i = 0; i < nRunTimes; i++)
 	{
-		r = ptd->op->info(_T("Thread %d example random log message(%d) for dll model testcase"), ptd->dwThreadId, i);
+		r = ptd->op->info(_T("Thread %ld example random log message(%zu) for dll model testcase"), ptd->dwThreadId, i);
 		if (!r)
 		{
-			printf("Thread %d of message %d error\n", ptd->dwThreadId, i);
+			printf("Thread %ld of message %zu error\n", ptd->dwThreadId, i);
 		}
 	}
 	// printf("Test Thread %d DONE!!!\n", ptd->dwThreadId);
@@ -117,7 +117,7 @@ DWORD test()
 			memset(phThreadArray, 0, sizeof(DWORD) * nThreadCount);
 			// 所有线程全部就绪
 			DWORD dwStart = GetTickCount();
-			for (long i = 0; i < nThreadCount; i++)
+			for (unsigned int i = 0; i < nThreadCount; i++)
 			{
 				ptd[i].dwThreadId = i;
 				ptd[i].op = fpGetClassObject(_T("text.log"));
@@ -135,7 +135,7 @@ DWORD test()
 				}
 			}
 			// ptd[0].op->print_queue_size(TRUE);
-			for (long i = 0; i < nThreadCount; i++)
+			for (unsigned int i = 0; i < nThreadCount; i++)
 			{
 				if (phThreadArray[i] != NULL)
 				{
@@ -147,7 +147,7 @@ DWORD test()
 			WaitForMultipleObjects(nThreadCount, phThreadArray, TRUE, INFINITE);
 			
 			// 关闭句柄
-			for (long i = 0; i < nThreadCount; i++)
+			for (unsigned int i = 0; i < nThreadCount; i++)
 			{
 				if (phThreadArray[i] != NULL)
 				{
@@ -156,7 +156,7 @@ DWORD test()
 			}
 			// 等待日志处理任务全部完成
 			DWORD time = 0;
-			for (long i = 0; i < nThreadCount; i++)
+			for (unsigned int i = 0; i < nThreadCount; i++)
 			{
 				time < ptd[i].dwPushTime ? time = ptd[i].dwPushTime : 0;
 				fpReleaseClassObject(ptd[i].op);
