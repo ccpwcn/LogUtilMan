@@ -23,13 +23,17 @@ CLog::CLog(const LPCTSTR lpszLogFilename, const BOOL bPrintQueueSize)
 
 	g_quitNow = FALSE;
 
-	assert(lpszLogFilename != NULL && lpszLogFilename[0] != _T('\n') && _T("日志文件名无效"));
+	assert(lpszLogFilename != NULL && _T("日志文件名称无效"));
+	assert(lpszLogFilename[0] != _T('\r') && lpszLogFilename[0] != _T('\n') && _T("日志文件名称无效"));
 	StringCchCopy(m_szFilename, BUFSIZ, lpszLogFilename);
 
 	_tfopen_s(&m_fpLog, m_szFilename, _T("a"));
 	assert(m_fpLog != NULL && _T("无法打开日志文件"));
 
-	m_bPrintQueueSize = bPrintQueueSize;
+	if (bPrintQueueSize != NULL) {
+		m_bPrintQueueSize = bPrintQueueSize;
+	}
+	
 	DWORD dwThread = 0;
 	m_hWriteThread = CreateThread(NULL, 0, m_fnWriteThread, this, CREATE_SUSPENDED, &dwThread);
 	assert(m_hWriteThread != NULL && _T("创建日志线程失败"));
@@ -184,7 +188,7 @@ void CLog::print_queue_size(__in const BOOL bPrintQueueSize)
 DWORD CLog::m_fnWriteThread(LPVOID lpParam)
 {
 	CLog * pLogInstance = (CLog *)lpParam;
-	assert(pLogInstance != NULL);
+	assert(pLogInstance != NULL && _T("日志文件对象无效"));
 
 	int nCoefficient = pLogInstance->m_fnGetSystemPreformanceCoefficient();
 	int nOriginCoefficient = nCoefficient;
