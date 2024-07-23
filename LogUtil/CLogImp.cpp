@@ -44,6 +44,8 @@ CLog::CLog(const LPCTSTR lpszLogFilename, const BOOL bPrintQueueSize)
 	// 自动复原，初始状态为无信号状态，无信号就代表无日志
 	m_hWriteThreadEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
 	assert(m_hWriteThreadEvent != NULL && _T("线程通信机制异常"));
+
+	OutputDebugString(_T("日志实例初始化完毕"));
 }
 
 CLog::~CLog()
@@ -268,9 +270,9 @@ int CLog::m_fnGetSystemPreformanceCoefficient()
 {
 	int nCoefficient = 2;
 
-	// 默认电脑有4核CPU、8GB内存
+	// 默认电脑有4核CPU、16GB内存
 	int nProcessorCount = 4;
-	__int64 nMemorySize = 8 * 1024 * 1024 * 1024LL;
+	__int64 nMemorySize = 16 * 1024 * 1024 * 1024LL;
 
 	typedef struct _SYSTEM_BASIC_INFORMATION
 	{
