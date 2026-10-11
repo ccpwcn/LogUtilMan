@@ -8,6 +8,14 @@ public:
 	CLock();
 	~CLock();
 
+    // Disable copy and move to prevent accidental copying of the
+	// underlying CRITICAL_SECTION which would lead to double-delete
+	// and undefined behavior.
+	CLock(const CLock&) = delete;
+	CLock& operator=(const CLock&) = delete;
+	CLock(CLock&&) = delete;
+	CLock& operator=(CLock&&) = delete;
+
 	void Lock();
 	void Unlock();
 
